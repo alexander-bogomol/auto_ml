@@ -8,14 +8,14 @@ from sklearn.tree import DecisionTreeClassifier
 
 __all__ = ["train_model", "METRICS_DICT", "MODELS_DICT"]
 
-
+# Dictionary of available metrics. auto_ml name to sclearn functions.
 METRICS_DICT = {
     "F1": f1_score,
     "Accuracy": accuracy_score,
     "Precision": precision_score,
     "Recall": recall_score,
 }
-
+# Dictionary of available models. auto_ml name to sclearn estimators.
 MODELS_DICT = {
     "Support Vector Machines": SVC,
     "Logistic Regression": LogisticRegression,
