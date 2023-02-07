@@ -78,7 +78,7 @@ class AutoBinaryClassifier:
         return self.fitted_models_dict[best_model_name]
 
     def best_predict(self, data, inverse_transform=True):
-        """Return predictions from the most scored model, 
+        """Return predictions from the most scored model,
         producing or not labels decoding
         """
         # Preprocess data
@@ -93,8 +93,8 @@ class AutoBinaryClassifier:
             return model.predict(X)
 
     def feature_importance(self, model="Logistic Regression"):
-        """Return feature importance per columns.
-        Available models are Logistic Regression, Random Forest, Decision Tree"""
+        """Return feature importance per columns. Available models are
+        Logistic Regression, Random Forest, Decision Tree"""
 
         available_fi_models = ["Logistic Regression", "Random Forest", "Decision Tree"]
         if model in available_fi_models:

@@ -27,6 +27,7 @@ MODELS_DICT = {
 
 
 def train_model(model, X_train, X_test, target_train, target_test, metric):
+    """Return fitted model and its score"""
     estimator = model()
     estimator.fit(X_train, target_train)
     predictions = estimator.predict(X_test)
