@@ -3,6 +3,8 @@
 Для инициализации автоклассификатора необходимо передать список моделей, среди которых будет выбрана лучшая
 (на основании указанной при тренировке метрики).
 
+[Примеры использования](https://github.com/alexander-bogomol/auto_ml/blob/main/examples.ipynb)
+
 На данный момент доступны для оценки следующие модели:
 - SVM (Support Vector Machines)
 - LOGREG (Logistic Regression)
@@ -38,4 +40,3 @@ python3 -m pip install -r requirements.txt
 3. Для категориальных признаков используется OneHotEncoder. Пожалуйста, учитывайте это, если в датафрейме используется большое количество категорий.
 4. Невозможна тренировка одинаковых видов классификаторов.
 
-[Примеры использования](https://github.com/alexander-bogomol/auto_ml/blob/main/examples.ipynb)
