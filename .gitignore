@@ -1,6 +1,9 @@
 drafts/
 packages/
 __pycache__/
+.pytest_cache/
+utils/
+
 tasks.md
 X.csv
 notebook.ipynb

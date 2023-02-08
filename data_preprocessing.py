@@ -1,6 +1,6 @@
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
-from utils.training_models import MODELS_DICT
+from models import MODELS
 
 __all__ = ["build_preprocessor", "build_models_dict"]
 
@@ -34,7 +34,7 @@ def build_models_dict(models):
     models_dict = dict()
     for model in models:
         try:
-            models_dict[model] = MODELS_DICT[model]
+            models_dict[model] = MODELS[model]
         except KeyError:
             return f"{model} is not in the available models list!"
     return models_dict

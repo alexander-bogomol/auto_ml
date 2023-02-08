@@ -3,9 +3,11 @@ import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
 
-from utils.data_preprocessing import build_preprocessor, build_models_dict
-from utils.training_models import train_model, METRICS_DICT
+from data_preprocessing import build_preprocessor, build_models_dict
+from training import train_classifier
+from metrics import METRICS
 
+__all__ = ["AutoBinaryClassifier"]
 
 class AutoBinaryClassifier:
     def __init__(self, models):
@@ -14,15 +16,15 @@ class AutoBinaryClassifier:
 
     def train_all_models(self, data, target_column, metric):
         """Make full training pipeline:
-        - data and label preprocessing
-        - train all models in models list
-        - save all fitted models in attributes
-        - save models and scores as DataFrame
+            - data and label preprocessing
+            - train all models in models list
+            - save all fitted models in attributes
+            - save models and scores as DataFrame
         """
 
         models_and_scores = []
         fitted_models_dict = dict()
-        classifier_metric = METRICS_DICT[metric]
+        classifier_metric = METRICS[metric]
 
         self.metric = metric
 
@@ -43,7 +45,7 @@ class AutoBinaryClassifier:
 
         # Go through the list and train the models
         for name, model in self.models_dict.items():
-            classifier, score = train_model(
+            classifier, score = train_classifier(
                 model,
                 train_matrix,
                 test_matrix,
@@ -92,25 +94,36 @@ class AutoBinaryClassifier:
         else:
             return model.predict(X)
 
-    def feature_importance(self, model="Logistic Regression"):
-        """Return feature importance per columns. Available models are
-        Logistic Regression, Random Forest, Decision Tree"""
+    def feature_importance(self, fi_type="logreg"):
+        """Return feature importance per columns according to feature importance type.
+        Available `fi_type` values are 'logreg', 'forest', 'tree'"""
 
-        available_fi_models = ["Logistic Regression", "Random Forest", "Decision Tree"]
-        if model in available_fi_models:
-            try:
-                coefficients = self.fitted_models_dict[model].feature_importances_
-            # If model is not in fitted_models_dict return KeyError
-            except KeyError:
-                return f"{model} not in the list of trained models"
-            # Logistic Regression has no `.feature_importances_` attribute, use coefficents
-            except AttributeError:
-                coefficients = self.fitted_models_dict[model].coef_[0]
-            # Get collumns names from ColumnTransformer pipeline
-            features = self.preprocessor.get_feature_names_out()
-            return pd.DataFrame(
-                columns=["Features", "Feature Importance"],
-                data=zip(features, coefficients),
+        # Make a dictionary that proceeds fi_type into model name from fitted_models_dict
+        available_fi_models = {
+            "logreg": "Logistic Regression",
+            "forest": "Random Forest",
+            "tree": "Decision Tree",
+        }
+
+        try:
+            # Choose model according to
+            model = available_fi_models[fi_type]
+        except KeyError:
+            raise KeyError(
+                "Incorrect fi_type. You have to use one of these values: 'logreg', 'forest', 'tree'"
             )
-        else:
-            return "You have to use one of these models: 'Logistic Regression', 'Random Forest', 'Decision Tree'"
+        try:
+            coefficients = self.fitted_models_dict[model].feature_importances_
+        # If model is not in fitted_models_dict return KeyError
+        except KeyError:
+            raise KeyError(f"{model} is not in the list of trained models")
+        # Logistic Regression has no `.feature_importances_` attribute, use coefficents
+        except AttributeError:
+            coefficients = self.fitted_models_dict[model].coef_[0]
+        # Get collumns names from ColumnTransformer pipeline
+        features = self.preprocessor.get_feature_names_out()
+        return pd.DataFrame(
+            columns=["Features", "Feature Importance"],
+            data=zip(features, coefficients),
+        )
+        
