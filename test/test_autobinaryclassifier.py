@@ -1,5 +1,6 @@
 import pytest
 import pandas as pd
+import numpy as np
 from src.BinaryClassifier import *
 
 
@@ -41,3 +42,14 @@ def test_abc__train_all_models_data_assertion(build_AutoBinaryClassifier_instanc
         build_AutoBinaryClassifier_instance.train_all_models([1, 2, 3], target_column="Survived", metric="F1")
     assert exc_info.value.args[0] == "Only pandas DataFrame are currently supported"
 
+def test_abc__train_all_models_functional(build_AutoBinaryClassifier_instance):
+    data = pd.read_csv("dataset/X.csv", dtype={"Sex": "object", "Pclass": "object"})
+    table = build_AutoBinaryClassifier_instance.train_all_models(data=data, target_column="Survived", metric="F1")
+    # Assert output is DataFrame
+    assert isinstance(table, pd.DataFrame)
+    # Assert 'Model' column contain correct values
+    assert np.array_equal(table['Model'].values, np.array(['Support Vector Machines', 'Decision Tree', 'Random Forest',
+       'Logistic Regression', 'KNN', 'Naive Bayes']))
+    # Assert 'F1' column contain array of floats
+    assert table["F1"].values.dtype.kind == 'f'
+...
