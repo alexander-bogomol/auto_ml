@@ -1,4 +1,4 @@
-from typing import Union, List, Dict, Optional, Callable
+from typing import Union, List, Dict, Optional, Callable, Any
 
 import numpy as np
 import pandas as pd
@@ -7,10 +7,10 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
 from sklearn.compose import ColumnTransformer
 
-from data_preprocessing import build_preprocessor, build_models_dict
-from training import train_classifier
-from metrics import *
-from models import *
+from src.data_preprocessing import build_preprocessor, build_models_dict
+from src.training import train_classifier
+from src.metrics import *
+from src.models import *
 
 __all__ = [
     "AutoBinaryClassifier",
@@ -40,11 +40,13 @@ class AutoBinaryClassifier:
     """
 
     def __init__(self, models: List[str]) -> None:
-        # Save dictionary of model names and sklearn estimators
+        if not isinstance(models, list):
+            raise AssertionError("Please enter the list of available models")
         if len(models) == 0:
-            raise ValueError(
+            raise AssertionError(
                 "You've entered an empty list of models. Please input at least one model"
             )
+        # Save dictionary of model names maped to sklearn estimators
         self.models = build_models_dict(models)
         self.fitted_models = dict()
 
@@ -57,6 +59,8 @@ class AutoBinaryClassifier:
         - save all fitted models in attributes
         - save models and scores as DataFrame
         """
+        if not isinstance(data, pd.DataFrame):
+            raise AssertionError("Only pandas DataFrame are currently supported")
         models_and_scores = []
         # Get sklearn metric function from dict
         classifier_metric: Callable = METRICS[metric]
@@ -74,22 +78,20 @@ class AutoBinaryClassifier:
         )
 
         # Preprocess data separately to prevent data leeking
-        train_matrix: np.ndarray = self.preprocessor.fit_transform(data_train)
-        test_matrix: Union[np.ndarray, pd.DataFrame] = self.preprocessor.transform(
-            data_test
-        )
-        target_train_enc: np.ndarray = self.label_encoder.fit_transform(target_train)
-        target_test_enc: np.ndarray = self.label_encoder.transform(target_test)
+        train_matrix = self.preprocessor.fit_transform(data_train)
+        test_matrix = self.preprocessor.transform(data_test)
+        target_train_enc = self.label_encoder.fit_transform(target_train)
+        target_test_enc = self.label_encoder.transform(target_test)
 
         # Go through the list and train the models
         for name, model in self.models.items():
             classifier, score = train_classifier(
-                model,
-                train_matrix,
-                test_matrix,
-                target_train_enc,
-                target_test_enc,
-                classifier_metric,
+                model=model,
+                data_train=train_matrix,
+                data_test=test_matrix,
+                target_train=target_train_enc,
+                target_test=target_test_enc,
+                metric=classifier_metric,
             )
             # Add fitted models to dictionary
             self.fitted_models[name] = classifier
@@ -102,7 +104,7 @@ class AutoBinaryClassifier:
         )
         return self.models_and_scores
 
-    def models_ranking(self, top=10):
+    def models_ranking(self, top: int = 10) -> pd.DataFrame:
         """Return top n models sorted by score from top to bottom"""
         ranking = (
             self.models_and_scores.sort_values(self.metric, ascending=False)
@@ -111,14 +113,14 @@ class AutoBinaryClassifier:
         )
         return ranking
 
-    def get_best_model(self):
+    def get_best_model(self) -> TypeClassifier:
         """Return the most scored model"""
         best_model_name = self.models_ranking(top=1).iloc[0, 0]
         return self.fitted_models[best_model_name]
 
     def best_predict(
         self, data: pd.DataFrame, inverse_transform: Optional[bool] = True
-    ):
+    ) -> Union[np.ndarray, List[Any]]:
         """Return predictions from the most scored model,
         producing or not labels decoding
         """
@@ -133,7 +135,7 @@ class AutoBinaryClassifier:
         else:
             return model.predict(X)
 
-    def feature_importance(self, fi_type="logreg"):
+    def feature_importance(self, fi_type: str = "logreg") -> pd.DataFrame:
         """Return feature importance per columns according to feature importance type.
         Available `fi_type` values are 'logreg', 'forest', 'tree'"""
 

@@ -2,7 +2,7 @@ from sklearn.metrics import f1_score, accuracy_score, precision_score, recall_sc
 
 __all__ = ["F1", "ACCURACY", "PRECISION", "RECALL", "METRICS"]
 
-# For ease of import, map variables to dictionary keys with sklearn classes
+# For ease of import for users, map variables to dictionary keys with sklearn classes
 F1 = "F1"
 ACCURACY = "Accuracy"
 PRECISION = "Precision"
