@@ -19,7 +19,7 @@ def build_AutoBinaryClassifier_instance():
         ("123", "Incorrect fi_type. You have to use one of these values: 'logreg', 'forest', 'tree'"),
     ],
 )
-def test_abc_feature_importance(build_AutoBinaryClassifier_instance, fi_type, error):
+def test_abc_feature_importance_assertion(build_AutoBinaryClassifier_instance, fi_type, error):
     with pytest.raises(KeyError) as exc_info:
         build_AutoBinaryClassifier_instance.feature_importance(fi_type)
     assert exc_info.value.args[0] == error

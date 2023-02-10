@@ -1,6 +1,7 @@
 drafts/
 __pycache__/
 .pytest_cache/
+.idea/
 
 tasks.md
 notebook.ipynb

@@ -1,4 +1,4 @@
-from typing import Union, List, Dict, Optional, Callable, Any
+from typing import Union, List, Optional, Callable, Any
 
 import numpy as np
 import pandas as pd
@@ -46,9 +46,13 @@ class AutoBinaryClassifier:
             raise AssertionError(
                 "You've entered an empty list of models. Please input at least one model"
             )
-        # Save dictionary of model names maped to sklearn estimators
+        # Save dictionary of model names mapped to sklearn estimators
         self.models = build_models_dict(models)
         self.fitted_models = dict()
+        self.models_and_scores = None
+        self.metric = None
+        self.preprocessor = None
+        self.label_encoder = None
 
     def train_all_models(
         self, data: pd.DataFrame, target_column: str, metric: str
@@ -77,7 +81,7 @@ class AutoBinaryClassifier:
             data.drop(columns=target_column), data[target_column]
         )
 
-        # Preprocess data separately to prevent data leeking
+        # Preprocess data separately to prevent data leaking
         train_matrix = self.preprocessor.fit_transform(data_train)
         test_matrix = self.preprocessor.transform(data_test)
         target_train_enc = self.label_encoder.fit_transform(target_train)
@@ -158,10 +162,10 @@ class AutoBinaryClassifier:
         # If model is not in fitted_models return KeyError
         except KeyError:
             raise KeyError(f"{model} is not in the list of trained models")
-        # Logistic Regression has no `.feature_importances_` attribute, use coefficents
+        # Logistic Regression has no `.feature_importance` attribute, use coefficients
         except AttributeError:
             coefficients = self.fitted_models[model].coef_[0]
-        # Get collumns names from ColumnTransformer pipeline
+        # Get columns names from ColumnTransformer pipeline
         features = self.preprocessor.get_feature_names_out()
         return pd.DataFrame(
             columns=["Features", "Feature Importance"],
